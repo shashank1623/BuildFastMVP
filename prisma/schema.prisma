@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Define the VerificationToken model
+model VerificationToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
+
+// Define the Session model
+model Session {
+  id        String   @id @default(cuid())
+  sessionId String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
+
+// Define the Account model
+model Account {
+  id        String   @id @default(cuid())
+  provider  String
+  providerAccountId String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Add these models to your existing schema
+model Upload {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fileName    String
+  fileSize    Int
+  fileType    String
+  s3Key       String
+  uploadedAt  DateTime  @default(now())
+
+  @@index([userId])
+}
+
+// Update User model
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  image         String?
+  googleId      String?   @unique
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  storageUsed   Int       @default(0)
+  uploads       Upload[]  // Add this line
+
+  verificationTokens VerificationToken[]
+  sessions          Session[]
+  accounts         Account[]
+}
