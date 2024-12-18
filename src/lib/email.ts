@@ -2,24 +2,20 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-export async function sendWelcomeEmail(email: string) {
+export async function sendVerificationEmail(email: string, otp: string) {
   try {
     await resend.emails.send({
-      from: 'BuildFast <shashankbhardwaj@bitelabs.in>',
+      from: 'no-reply <shashankbhardwaj@bitelabs.in>',
       to: email,
-      subject: 'Welcome to the BuildFast Waitlist!',
+      subject: 'Verify your email',
       html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2>Hi there,</h2>
-          <p>Thank you for joining the waitlist for BuildFast.</p>
-          <p>We're thrilled to have you on board! Soon, you'll experience how easy it is to transform textbook content into interactive quizzes.</p>
-          <p>Stay tuned for updates and early access invites.</p>
-          <p>- The BuildFast Team</p>
-        </div>
+        <h1>Verify your email</h1>
+        <p>Your verification code is: <strong>${otp}</strong></p>
+        <p>This code will expire in 10 minutes.</p>
       `,
     });
   } catch (error) {
-    console.error('Error sending welcome email:', error);
-    throw error;
+    console.error('Error sending email:', error);
+    throw new Error('Failed to send verification email');
   }
 }
